@@ -1,0 +1,13 @@
+{
+  "name": "vita",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+  },
+  "keywords": [],
+  "author": "hedashan",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20.12.2"
+  }
+}

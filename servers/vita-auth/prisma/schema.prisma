@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// 账号
+model Users {
+  id        Int      @id @default(autoincrement())
+  userId    String   @unique @map("user_id")
+  username  String?  @unique
+  email     String?  @unique
+  phone     String?  @unique
+  password  String
+  avatar    String?  @db.Text
+  createdAt DateTime @default(now()) @map("create_at")
+  updatedAt DateTime @updatedAt @map("update_at")
+  status    Boolean  @default(true)
+
+  @@map("va_users")
+}
+
+// 客户端
+model Clients {
+  id           Int     @id @default(autoincrement())
+  clientId     String  @unique @map("client_id")
+  clientName   String  @map("client_name")
+  clientSecret String  @map("client_secret")
+  redirectUri  String? @map("redirect_uri")
+  grants       String  @default("password,refresh_token")
+  status       Boolean @default(true)
+  // basic
+  scope        String? @default("basic")
+
+  @@map("va_clients")
+}
+
+/// 授权token记录
+model AccessTokens {
+  // 用户ID
+  userId      String   @id @map("user_id")
+  clientId    String   @map("client_id") // 客户端ID
+  accessToken String   @map("access_token") @db.VarChar(255) // 授权token
+  expiresAt   DateTime @map("expires_at") // 过期时间
+
+  @@map("va_access_tokens")
+}
+
+/// 刷新token
+model RefreshTokens {
+  userId       String   @id @map("user_id")
+  clientId     String   @map("client_id")
+  refreshToken String   @map("refresh_token") @db.VarChar(255)
+  expiresAt    DateTime @map("expires_at")
+
+  @@map("va_refresh_tokens")
+}
+
+// 授权码
+model AuthorizationCodes {
+  id          Int      @id @default(autoincrement())
+  code        String
+  userId      String   @map("user_id")
+  clientId    String   @map("client_id")
+  redirectUri String   @map("redirect_uri")
+  expiresAt   DateTime @map("expires_at")
+
+  @@map("va_authorization_codes")
+}
+
+// p,role,resource,read
+// p,user,resource,read
+// g,user,role
+// g2,resource,sub_resource
+// 权限策略规则
+model CasbinRule {
+  id    Int     @id @default(autoincrement())
+  ptype String  @db.VarChar(100)
+  v0    String? @db.VarChar(100)
+  v1    String? @db.VarChar(100)
+  v2    String? @db.VarChar(100)
+  v3    String? @db.VarChar(100)
+  v4    String? @db.VarChar(100)
+  v5    String? @db.VarChar(100)
+
+  @@map("va_casbin_rules")
+}
+
+// 角色
+model Roles {
+  id          Int       @id @default(autoincrement())
+  roleId      String    @unique @map("role_id")
+  roleName    String?   @map("role_name") @db.VarChar(100)
+  description String?   @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+  sort        Int?
+  status      Boolean   @default(true)
+
+  @@map("va_roles")
+}
+
+// 资源
+model Resources {
+  id           Int         @id @default(autoincrement())
+  resourceId   String      @unique @map("resource_id")
+  resourceCode String      @unique @map("resource_code")
+  resourceType Int         @map("resource_type") @db.UnsignedTinyInt
+  resourceName String?     @map("resource_name") @db.VarChar(100)
+  resourceIcon String?     @map("resource_icon") @db.VarChar(100)
+  resourcePath String?     @map("resource_path") @db.VarChar(100)
+  parentId     Int?        @map("parent_id")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime?   @updatedAt @map("updated_at")
+  sort         Int?        @db.UnsignedTinyInt
+  status       Boolean     @default(true)
+  children     Resources[] @relation("res_tree")
+  parent       Resources?  @relation("res_tree", fields: [parentId], references: [id])
+
+  @@map("va_resources")
+}

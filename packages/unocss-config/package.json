@@ -1,0 +1,10 @@
+{
+  "name": "@vita/unocss-config",
+  "version": "0.1.1",
+  "main": "uno.config.ts",
+  "private": true,
+  "dependencies": {
+    "@unocss/preset-mini": "^0.59.4",
+    "unocss": "^0.59.4"
+  }
+}
